@@ -108,6 +108,7 @@
                             <th>نوع المنتج</th>
                             <th>اللون</th>
                             <th>المقاس</th>
+                            <th>عدد القطع</th>
                             <th>الادوات</th>
                             <th>
                                 <input class="form-check-input p" type="checkbox" id="selectAll" data-toggle="tooltip" title="تحديد الكل">
@@ -124,12 +125,20 @@
                                 $arraySize = ['0', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
                                 $SizeNum = $product['ProductSize'];
                                 $size = $arraySize[$SizeNum];
+                                
+                                $number = $product['NumOfPieces'];
+                                if($number == 0) :
+                                    $numberofpieces = 'لا يوجد';
+                                else:
+                                    $numberofpieces = $number;
+                                endif;
 
                                 echo    
                                     '<tr>
                                         <td>' . $product['ProductName'] . '</td>
                                         <td>' . $product['ProductColor'] . '</td>
                                         <td>' . $size . '</td>
+                                        <td>' . $numberofpieces . '</td>
                                         <td>
                                             <a href="products.php?do=Edit&productid=' . $product['ProductID'] . '" class="btn btn-success px-2 my-1" data-toggle="tooltip" title="تعديل"> 
                                                 <i class="fa fa-edit"></i>
@@ -227,6 +236,16 @@
                     </select>
                 </div>
 
+                <!-- product number of pieces field -->
+                <div class="input-group w-75 mx-auto my-4 ">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text bg-primary icon text-light"> 
+                            <i class="fas fa-list-ol"></i>
+                        </div>
+                    </div>
+                    <input type="number" name="productpieces" value="0" placeholder="عدد القطع" class="form-control text-center">
+                </div>
+
                 <div class="w-75 mx-auto my-4 text-right">
                     <input type="submit" value="اضافة" class="btn btn-dark px-4">          
                 </div>
@@ -255,6 +274,7 @@
             $name   = $_POST['productname'];
             $color  = $_POST['productcolor'];
             $size   = $_POST['productsize'];
+            $number = $_POST['productpieces'];
             
             // Validate the form
             $formErrors = [];
@@ -273,7 +293,7 @@
             
             if(count($formErrors) != 0) :
                 foreach($formErrors as $error) :
-                    echo  '<div class="alert alert-danger" role="alert">' . $error . '</div>';
+                    echo  '<div class="alert alert-danger text-center" dir="rtl" role="alert">' . $error . '</div>';
                 endforeach;
             else :
                 // check if user Exist in database
@@ -288,27 +308,28 @@
                 $checkProduct = $check->rowCount();
 
                 if($checkProduct == 1) :
-                    $themsg ='  <div class="alert alert-danger" role="alert">
+                    $themsg ='  <div class="alert alert-danger text-center" dir="rtl" role="alert">
                                     للاسف هذا المنتج موجود بالفلعل
                                 </div>';
                     RedirectFun( $themsg,'back');    
                 else:
                     // now insert the new data into the data base
                     $check = $con->prepare("INSERT  INTO 
-                                                    products    (ProductName, ProductColor, ProductSize)
-                                                    VALUES      (?, ?, ?)");
+                                                    products    (ProductName, ProductColor, ProductSize, 
+                                                                NumOfPieces)
+                                                    VALUES      (?, ?, ?, ?)");
                     
-                    $check->execute(array($name, $color, $size));
+                    $check->execute(array($name, $color, $size, $number));
 
                     // print success message
-                    $themsg = ' <div class="alert alert-primary" role="alert">
+                    $themsg = ' <div class="alert alert-primary text-center" dir="rtl" role="alert">
                                     ' . $check->rowcount() . ' منتج تمت اضافته بنجاح
                                 </div>' ;
                     RedirectFun($themsg, 'products', 'insert');
                 endif;
             endif;
         else :
-            $themsg = ' <div class="alert alert-danger" role="alert">
+            $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
                             للاسف لا يمكن الدخول على هذه الصفحه مباشرة 
                         </div>';
             RedirectFun($themsg);  
@@ -332,20 +353,21 @@
             
         <?php
         
-        // check if get request productid is numeric & get the integer value of it 
-        $productid =    isset($_GET['productid']) && is_numeric($_GET['productid']) ? 
-                        intval($_GET['productid']) : 0 ;
-        
-        // check if the product exist in database & select all data depend on this ID
-        $check = $con->prepare("SELECT  *
-                                FROM    products
-                                WHERE   ProductID = ? 
-                                LIMIT   1" ); 
-        
-        $check->execute(array($productid));    // execute query
-        $count = $check->rowcount();
-        if($count > 0) :
-            $product = $check->fetch();       // fetch data in array
+            // check if get request productid is numeric & get the integer value of it 
+            $productid =    isset($_GET['productid']) && is_numeric($_GET['productid']) ? 
+                            intval($_GET['productid']) : 0 ;
+            
+            // check if the product exist in database & select all data depend on this ID
+            $check = $con->prepare("SELECT  *
+                                    FROM    products
+                                    WHERE   ProductID = ? 
+                                    LIMIT   1" ); 
+            
+            $check->execute(array($productid));    // execute query
+            $count = $check->rowcount();
+            if($count > 0) :
+                $product = $check->fetch();       // fetch data in array
+            
             ?>
 
             <!-- start form to update -->
@@ -435,6 +457,16 @@
                         </select>
                     </div>
 
+                    <!-- product number of pieces field -->
+                    <div class="input-group w-75 mx-auto my-4 ">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text bg-primary icon text-light"> 
+                                <i class="fas fa-list-ol"></i>
+                            </div>
+                        </div>
+                        <input type="number" name="productpieces" placeholder="عدد القطع" class="form-control text-center" value="<?php echo $product['NumOfPieces']; ?>">
+                    </div>
+
 
                     <div class="w-75 mx-auto my-4 text-right">
                         <input type="submit" value="حفظ" class="btn btn-dark px-4">          
@@ -449,7 +481,7 @@
         
         <?php
         else : 
-            $themsg = ' <div class="alert alert-danger" role="alert">
+            $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
                             للاسف ، هذا المنتج غير موجود
                         </div>';
             RedirectFun($themsg);
@@ -478,6 +510,7 @@
             $name       = $_POST['productname'];
             $color      = $_POST['productcolor'];
             $size       = $_POST['productsize'];
+            $number     = $_POST['productpieces'];
             
             // Validate the form
             $formErrors = [];
@@ -496,26 +529,27 @@
             
             if(count($formErrors) != 0) :
                 foreach($formErrors as $error) :
-                    echo  '<div class="alert alert-danger" role="alert">' . $error . '</div>';
+                    echo  '<div class="alert alert-danger text-center" dir="rtl" role="alert">' . $error . '</div>';
                 endforeach;
             else :
                 // now update the data base with this new data
                 $check = $con->prepare("UPDATE  products 
                                         SET     ProductName = ?,
                                                 ProductColor = ?,
-                                                ProductSize = ?
+                                                ProductSize = ?,
+                                                NumOfPieces = ?
                                         WHERE   ProductID = ?");
-                $check->execute(array($name, $color, $size, $productid));
+                $check->execute(array($name, $color, $size, $number, $productid));
 
                 // print success message
-                $themsg ='  <div class="alert alert-success" role="alert">
+                $themsg ='  <div class="alert alert-success text-center" dir="rtl" role="alert">
                                 ' . $check->rowcount() . ' منتج تم تعديله بنجاح
                             </div>' ;
                 RedirectFun($themsg, 'products', 'update');  
 
             endif;
         else :
-            $themsg = ' <div class="alert alert-danger" role="alert">
+            $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
                             للاسف لا يمكن الدخول على هذه الصفحه مباشرة 
                         </div>';
             RedirectFun($themsg);  
@@ -551,12 +585,12 @@
                     $count += 1;
                 endforeach;
                 // print success message
-                $themsg = ' <div class="alert alert-danger" role="alert">
+                $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
                             ' . $count . ' منتج تم حذفه بنجاح
                             </div>' ;
                 RedirectFun($themsg, 'products', 'delete');
             else:
-                $themsg = ' <div class="alert alert-danger" role="alert"> 
+                $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert"> 
                                 اسف ، يجب تحديد بعض المنتجات
                             </div>';
                 RedirectFun($themsg);
@@ -577,13 +611,13 @@
                 $check->execute(array($productid));
 
                 // print success message
-                $themsg = ' <div class="alert alert-danger" role="alert">
+                $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
                             ' . $check->rowcount() . ' منتج تم حذفه بنجاح
                             </div>' ;
                 RedirectFun($themsg, 'products', 'delete');
 
             else:
-                $themsg = ' <div class="alert alert-danger" role="alert"> 
+                $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert"> 
                                 للاسف هذا المنتج غير موجود
                             </div>';
                 RedirectFun($themsg);

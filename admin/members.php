@@ -45,7 +45,6 @@
         ///=======================================================================//
 
     if($do == 'Manage') :
-        // Manage page
         if($_SERVER['REQUEST_METHOD'] == 'POST') :
             $phone   = $_POST['SearchPhone'];
         else :
@@ -70,7 +69,7 @@
         $check->execute();
         // fetech all data from data base
         $users = $check->fetchAll();
-
+    // Manage page
     ?>
         <!-- start manage page -->
         <h1 class="text-center font-weight-bold mt-3 mb-4"> ادارة الاعضاء </h1>
@@ -153,7 +152,11 @@
                                             <td>' . $user['Email'] . '</td>
                                             <td>' . $user['FullName'] . '</td>
                                             <td>' . $user['City'] . ' - ' . $user['Address'] . '</td>
-                                            <td>' . $user['Phone'] . '</td>
+                                            <td>' . $user['Phone'] ;
+                                    if($user['Phone2'] != 0) :
+                                        echo ' - ' . $user['Phone2'] ;
+                                    endif;
+                                        echo'</td>
                                             <td>' . $status . '</td>
                                             <td>' . $user['RegDate'] . '</td>
                                             <td>
@@ -306,6 +309,16 @@
                     <input type="text" name="phone" placeholder="الهاتف" autocomplete="off" required="required" class="form-control text-center">
                 </div>
 
+                <!-- user phone2 field -->
+                <div class="input-group w-75 mx-auto my-4 ">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text bg-primary icon text-light"> 
+                            <i class="fas fa-phone"></i>
+                        </div>
+                    </div>
+                    <input type="text" name="phone2" placeholder="الهاتف اضافى" autocomplete="off" class="form-control text-center">
+                </div>
+
                 <!-- user status field -->
                 <?php 
                     if($userstats == 1) :
@@ -367,6 +380,12 @@
             // convert phone number from arabic to english
             $number   = $_POST['phone'];
             $phone    = convertArabicNumToEnglish($number);
+            if(isset($_POST['phone2'])) :
+                $number2  = $_POST['phone2'];
+                $phone2   = convertArabicNumToEnglish($number2);
+            else :
+                $phone2   = 0;
+            endif;
 
             $hashpass = sha1($_POST['password']);
             // Validate the form
@@ -410,14 +429,14 @@
             
             if(count($formErrors) != 0) :
                 foreach($formErrors as $error) :
-                    echo  '<div class="alert alert-danger" role="alert">' . $error . '</div>';
+                    echo  '<div class="alert alert-danger text-center" dir="rtl" role="alert">' . $error . '</div>';
                 endforeach;
                 RedirectFun();  
             else :
                 // check if user Exist in database
                 $checkUser = CheckItem('UserName', 'users', $user);
                 if($checkUser == 1) :
-                    $themsg ='  <div class="alert alert-danger" role="alert">
+                    $themsg ='  <div class="alert alert-danger text-center" dir="rtl" role="alert">
                                     للاسف هذا المستخدم موجود بالفلعل
                                 </div>';
                     RedirectFun( $themsg,'back');    
@@ -425,20 +444,20 @@
                     // now insert the new data into the data base
                     $check = $con->prepare("INSERT INTO 
                                                     users   (UserName, Password, Email, FullName, City,
-                                                            Address, Phone, Status, ManagerID, Approve, RegDate) 
-                                                    VALUES  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())");
+                                                            Address, Phone, Phone2, Status, ManagerID, Approve, RegDate) 
+                                                    VALUES  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())");
                     
-                    $check->execute(array($user, $hashpass, $email, $name, $city, $address, $phone, $status, $managerid, $approve));
+                    $check->execute(array($user, $hashpass, $email, $name, $city, $address, $phone, $phone2, $status, $managerid, $approve));
 
                     // print success message
-                    $themsg = ' <div class="alert alert-primary" role="alert">
+                    $themsg = ' <div class="alert alert-primary text-center" dir="rtl" role="alert">
                                     ' . $check->rowcount() . ' عضو تمت اضافته بنجاح
                                 </div>' ;
                     RedirectFun($themsg, 'members', 'insert');
                 endif;
             endif;
         else :
-            $themsg = ' <div class="alert alert-danger" role="alert">
+            $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
                             للاسف لا يمكن الدخول على هذه الصفحه مباشرة 
                         </div>';
             RedirectFun($themsg);  
@@ -569,6 +588,16 @@
                             <input type="text" name="phone" placeholder="الهاتف" autocomplete="off" required="required" value="<?php echo $user['Phone']; ?>" class="form-control text-center">
                         </div>
 
+                        <!-- user phone field -->
+                        <div class="input-group w-75 mx-auto my-4 ">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text bg-primary icon text-light"> 
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                            </div>
+                            <input type="text" name="phone2" placeholder="الهاتف" autocomplete="off" value="<?php echo $user['Phone2']; ?>" class="form-control text-center">
+                        </div>
+
                         <!-- user status field -->
                         <?php 
                             if($userstats == 1) :
@@ -619,8 +648,8 @@
         
         <?php
         else : 
-            $themsg = ' <div class="alert alert-danger" role="alert">
-                           للاسف هذا المنتج غير موجود 
+            $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
+                           للاسف هذا الععضو غير موجود 
                         </div>';
             RedirectFun($themsg);
         endif;
@@ -656,6 +685,12 @@
             // convert phone number from arabic to english
             $number   = $_POST['phone'];
             $phone    = convertArabicNumToEnglish($number);
+            if(isset($_POST['phone2'])) :
+                $number2  = $_POST['phone2'];
+                $phone2   = convertArabicNumToEnglish($number2);
+            else :
+                $phone2   = 0;
+            endif;
 
             // password trick 
             $pass = empty($_POST['newpassword']) ? $_POST['oldpassword'] : sha1($_POST['newpassword']);
@@ -702,7 +737,7 @@
             
             if(count($formErrors) != 0) :
                 foreach($formErrors as $error) :
-                    echo  '<div class="alert alert-danger" role="alert">' . $error . '</div>';
+                    echo  '<div class="alert alert-danger text-center" dir="rtl" role="alert">' . $error . '</div>';
                 endforeach;
             else :
                 // now update the data base with this new data
@@ -714,19 +749,20 @@
                                             City = ?,
                                             Address = ?,
                                             Phone = ?,
+                                            Phone2 = ?,
                                             Status = ?
                                         WHERE ID = ?");
-                $check->execute(array($user, $pass, $email, $name, $city, $address, $phone, $status, $userid));
+                $check->execute(array($user, $pass, $email, $name, $city, $address, $phone, $phone2, $status, $userid));
 
                 // print success message
-                $themsg ='  <div class="alert alert-success" role="alert">
+                $themsg ='  <div class="alert alert-success text-center" dir="rtl" role="alert">
                                 ' . $check->rowcount() . ' عضو تم تعديله بنجاح
                             </div>' ;
                 RedirectFun($themsg, 'members', 'update');  
 
             endif;
         else :
-            $themsg = ' <div class="alert alert-danger" role="alert">
+            $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
                             للاسف لا يمكن الدخول على هذه الصفحه مباشرة 
                         </div>';
             RedirectFun($themsg);  
@@ -762,12 +798,12 @@
                     $count += 1;
                 endforeach;
                 // print success message
-                $themsg = ' <div class="alert alert-danger" role="alert">
+                $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
                             ' . $count . ' عضو تم حذفه بنجاح
                             </div>' ;
                 RedirectFun($themsg, 'members', 'delete');
             else:
-                $themsg = ' <div class="alert alert-danger" role="alert"> 
+                $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert"> 
                                 اسف ، يجب تحديد بعض الاعضاء
                             </div>';
                 RedirectFun($themsg);
@@ -787,14 +823,14 @@
                 $check->execute(array($userid));
 
                 // print success message
-                $themsg = ' <div class="alert alert-danger" role="alert">
+                $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
                             ' . $check->rowcount() . ' عضو تم حذفه بنجاح
                             </div>' ;
                 RedirectFun($themsg, 'members', 'delete');
 
             else:
-                $themsg = ' <div class="alert alert-danger" role="alert"> 
-                                للاسف هذا المسخدم غير موجود
+                $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert"> 
+                                للاسف هذا العضو غير موجود
                             </div>';
                 RedirectFun($themsg);
             endif;
@@ -832,13 +868,13 @@
                 $check->execute(array($userid));
 
                 // print success message
-                $themsg = ' <div class="alert alert-success" role="alert">
+                $themsg = ' <div class="alert alert-success text-center" dir="rtl" role="alert">
                             ' . $check->rowcount() . ' عضو جديد تم الموافقة عليه
                             </div>' ;
                 RedirectFun($themsg, 'members', 'Approve');
 
             else:
-                $themsg = ' <div class="alert alert-danger" role="alert"> 
+                $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert"> 
                                 للاسف هذا المستخدم غير موجود
                             </div>';
                 RedirectFun($themsg);

@@ -9,7 +9,7 @@
 
       elseif($_SESSION['UserStatus'] == 2) :
         if($_SESSION['UserApprove'] == 1) :
-          header('Location: members.php');
+          header('Location: dashboard.php');
         elseif($_SESSION['UserApprove'] == 0) :
           header('Location: logout.php');
         endif;
@@ -59,7 +59,7 @@
             $_SESSION['UserApprove'] = $user['Approve'];   // register session Approve
             $_SESSION['UserCity']    = $user['City'];      // register session City
           
-            header('Location: dashboard.php');             // redirect to dashboard page
+            header('Location: index.php');             // redirect to dashboard page
             exit();
         endif;
     endif;

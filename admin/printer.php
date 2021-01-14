@@ -9,9 +9,14 @@
     $pageTitle = 'الطابعه';
 
     // check if session exist or not
-    if(isset($_SESSION['Username']) && $_SESSION['UserStatus'] == 1) :
+    if(isset($_SESSION['Username'])) :
         include("init.php");
-        $do = isset($_GET['do']) ? $_GET['do'] : 'Manage';
+        if($_SESSION['UserStatus'] == 1) :
+            $do = isset($_GET['do']) ? $_GET['do'] : 'Manage';
+        elseif($_SESSION['UserStatus'] == 2) :
+            $do = isset($_GET['do']) ? $_GET['do'] : 'Manage';
+            $city = $_SESSION['UserCity'];
+        endif;
     else :
         header('Location: index.php');   // redirect to login page
         exit();
@@ -43,57 +48,64 @@
             $Date = '';
         endif;
         
-        if($filter != 'all') :
-            if(!empty ($Date)) :
-                $check = $con->prepare("SELECT      orders.*,
-                                                    products.*  
-                                        FROM        orders
-                                        INNER JOIN  products
-                                                ON  products.ProductID = orders.OrderModel
-                                        WHERE       orders.Status = 0
-                                        AND         orders.Approve = 1
-                                        AND         orders.City = '$filter'
-                                        AND         orders.OrderDate = '$Date'
-                                        ORDER BY    orders.OrderID DESC ");
+        if($_SESSION['UserStatus'] == 1) :
+            if($filter != 'all') :
+                if(!empty ($Date)) :
+                    $check = $con->prepare("SELECT      orders.*  
+                                            FROM        orders
+                                            WHERE       orders.Status = 0
+                                            AND         orders.Approve = 1
+                                            AND         orders.City = '$filter'
+                                            AND         orders.OrderDate = '$Date'
+                                            ORDER BY    orders.OrderID DESC ");
+                else:
+                    $check = $con->prepare("SELECT      orders.*
+                                            FROM        orders
+                                            WHERE       orders.Status = 0
+                                            AND         orders.Approve = 1
+                                            AND         orders.City = '$filter'
+                                            ORDER BY    orders.OrderID DESC ");
+                endif;
             else:
-                $check = $con->prepare("SELECT      orders.*,
-                                                    products.*  
-                                        FROM        orders
-                                        INNER JOIN  products
-                                                ON  products.ProductID = orders.OrderModel
-                                        WHERE       orders.Status = 0
-                                        AND         orders.Approve = 1
-                                        AND         orders.City = '$filter'
-                                        ORDER BY    orders.OrderID DESC ");
+                if(!empty($Date)) :
+                    $check = $con->prepare("SELECT      orders.* 
+                                            FROM        orders
+                                            WHERE       orders.Status = 0
+                                            AND         orders.Approve = 1
+                                            AND         orders.OrderDate = '$Date'
+                                            ORDER BY    orders.OrderID DESC ");
+                else:
+                    $check = $con->prepare("SELECT      orders.*  
+                                            FROM        orders
+                                            WHERE       orders.Status = 0
+                                            AND         orders.Approve = 1
+                                            ORDER BY    orders.OrderID DESC ");
+                endif;
             endif;
-        else:
+        elseif($_SESSION['UserStatus'] == 2) :
             if(!empty($Date)) :
-                $check = $con->prepare("SELECT      orders.*,
-                                                    products.*  
+                $check = $con->prepare("SELECT      orders.* 
                                         FROM        orders
-                                        INNER JOIN  products
-                                                ON  products.ProductID = orders.OrderModel
                                         WHERE       orders.Status = 0
                                         AND         orders.Approve = 1
+                                        AND         orders.City = '$city'
                                         AND         orders.OrderDate = '$Date'
                                         ORDER BY    orders.OrderID DESC ");
             else:
-                $check = $con->prepare("SELECT      orders.*,
-                                                    products.*  
+                $check = $con->prepare("SELECT      orders.* 
                                         FROM        orders
-                                        INNER JOIN  products
-                                                ON  products.ProductID = orders.OrderModel
                                         WHERE       orders.Status = 0
                                         AND         orders.Approve = 1
+                                        AND         orders.City = '$city'
                                         ORDER BY    orders.OrderID DESC ");
             endif;
-        endif;  
-
+        endif;
         $check->execute();
 
         // fetech all data from data base
         $orders = $check->fetchAll();
 
+    // Manage Page
     ?>
         <!-- start manage page -->
         <h1 class="text-center font-weight-bold my-3"> طباعة الطلبات </h1>
@@ -101,12 +113,14 @@
         <div class="mx-5 pb-5 min-h">
 
                 
-            <div class="d-flex justify-content-between mb-3">    
+            <div class="d-flex justify-content-end mb-3">    
                 <form method="POST" action="">
                     <div class="d-flex">
                         <?php
-                            $cities = ['القاهره', 'الاسكندرية','البحيرة','كفر الشيخ','السويس','الشرقية','الفيوم' ,'المنوفية', 'الجيزة '];
-                            CreateSelectBox('city', $cities, 'Filter');
+                            if($_SESSION['UserStatus'] == 1) :
+                                $cities = ['القاهره', 'الاسكندرية','البحيرة','كفر الشيخ','السويس','الشرقية','الفيوم' ,'المنوفية', 'الجيزة '];
+                                CreateSelectBox('city', $cities, 'Filter');
+                            endif;
                         ?>
                     
                         <input type="date" class="form-control ml-2" name="SearchDate">
@@ -127,10 +141,11 @@
                 <table class="table table-bordered shadow main-table table-hover text-center">
                     <thead class="thead-dark">
                         <tr>
+                            <th>رقم الطلب</th>
                             <th>اسم العميل</th>
                             <th>العنوان</th>
                             <th>الهاتف</th>
-                            <th>الموديل</th>
+                            <th>الطلبات</th>
                             <th>السعر</th>
                             <th>التاريخ</th>
                             <th>
@@ -138,37 +153,66 @@
                             </th>
                         </tr>
                     </thead>
-                <tbody>
+                    
+                    <tbody>
 
-                <!-- print in the table from data base -->
-                <?php
+                        <!-- print in the table from data base -->
+                        <?php
                         foreach($orders as $order) :
                             
+                            // fetch orders from database
+                            $check = $con->prepare("SELECT      pieces.*,
+                                                                products.*
+                                                    FROM        pieces
+                                                    INNER JOIN  products 
+                                                            ON  pieces.PieceModel = products.ProductID
+                                                    WHERE       pieces.OrderNumber = ?");
+                            $check->execute(array($order['OrderID']));
+                            $pieces = $check->fetchAll();
+
                             $arraySize = ['0', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
-                            $SizeNum = $order['ProductSize'];
-                            $size = $arraySize[$SizeNum];
-                        
+                            
                             echo    
                                 '<tr>
+                                    <td>' . $order['OrderID'] . '</td>
                                     <td>' . $order['ClientName'] . '</td>
-                                    <td>' . $order['City'] . ' - ' . $order['ClientAddress'] . '
-                                    </td>
+                                    <td>' . $order['City'] . ' - ' . $order['ClientAddress'] . '</td>
                                     <td>' . $order['ClientPhone'] . '</td>
-                                    <td>' 
-                                        . $size . ' - ' 
-                                        . $order['ProductName'] . ' - ' 
-                                        . $order['ProductColor'] .
-                                    '</td>
-                                    <td>' . $order['OrderPrice'] . '</td>                              
+                                    
+                                    <td class="bord">
+                                        <table class="w-100">';
+                                        $totalprice = 0;
+
+                                        foreach($pieces as $piece) :
+                                            $SizeNum = $piece['ProductSize'];
+                                            $size = $arraySize[$SizeNum];
+                                            
+                                            echo' <tr>
+                                                    <td>'   . $size . ' - ' 
+                                                            . $piece['ProductName'] . ' - ' 
+                                                            . $piece['ProductColor'] . '
+                                                    </td>
+                                                    <td dir="rtl">'
+                                                            . $piece['NumberOfPieces'] . '
+                                                            قطعة
+                                                    </td>
+                                                </tr>';
+                                            $totalprice += $piece['PiecePrice'];
+                                        endforeach;
+
+                                        echo'</table>
+                                    </td>
+                                    <td dir=rtl>' . $totalprice . ' جنيهاً</td>
+                                    
                                     <td>' . $order['OrderDate'] . '</td>                              
                                     <td>
                                         <input class="form-check-input" type="checkbox" id="checkItem" name="check[]" value="' . $order['OrderID'] . '">
                                     </td>
                                 </tr>';
                         endforeach;
-                ?>
+                        ?>
 
-                </tbody>
+                    </tbody>
                 </table>
             </form>
 
@@ -218,7 +262,7 @@
         
         <div class="text-center px-3 page">
 
-            <div class="row">
+            <div class="row d-flex justify-content-center">
 
                 <?php
 
@@ -227,102 +271,162 @@
                 foreach($PrintedOrders as $orderid) :
                     
                     // select all orders
-                    $check = $con->prepare("SELECT      orders.*,
-                                                        products.*  
+                    $check = $con->prepare("SELECT      orders.*  
                                             FROM        orders
-                                            INNER JOIN  products
-                                                    ON  products.ProductID = orders.OrderModel
                                             WHERE       orders.OrderID = ? "); 
 
                     $check->execute(array($orderid));
-
-                    // fetech all data from data base
                     $order = $check->fetch();
-                    
-                    $SizeNum = $order['ProductSize'];
-                    $size = $arraySize[$SizeNum];
-                    
+
+                    // fetch orders from database
+                    $check1 = $con->prepare("SELECT      pieces.*,
+                                                        products.*
+                                            FROM        pieces
+                                            INNER JOIN  products 
+                                                    ON  pieces.PieceModel = products.ProductID
+                                            WHERE       pieces.OrderNumber = ?");
+                    $check1->execute(array($orderid));
+                    $pieces = $check1->fetchAll();           
+
+                    $arraySize = ['0', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+             
                     // now update print col to set order printed
                     $check2 = $con->prepare("   UPDATE  orders 
                                                 SET     Status = 1
                                                 WHERE   OrderID = ? "); 
 
                     $check2->execute(array($orderid));
+                  
                     ?>
                                     
       
-                    <div class="col-6 text-left my-3 text-break card">
-                        <div class="bord layer d-flex flex-column justify-content-space-between text-right font-weight-bolder">
+                    <div class="col-12 card text-right d-flex px-3" dir="rtl">
+                        
+                        <div class="w-100 h-100 d-flex flex-column justify-content-around px-2 bord">
 
-                            <div class="row w-100">
-                                <div class="col-9">
-                                    <?php 
-                                        echo $order['ClientName'];
-                                    ?>
+                            <div class="row w-100 mx-0">
+
+                                <div class="col-4 d-flex px-0">
+                                    <div class="col-5 font-weight-bolder px-0">
+                                        رقم الطلب : 
+                                    </div>
+                                    <div class ="col-7 px-0">
+                                        <?php 
+                                           echo $order['OrderID'];
+                                        ?>
+                                    </div>
                                 </div>
-                                <div class="col-3">
-                                    الاسم 
+
+                                <div class="col-4 d-flex px-0">
+                                    <div class="col-3 px-0 font-weight-bolder">
+                                        التاريخ : 
+                                    </div>
+                                    <div class="col-9">
+                                        <?php 
+                                            echo $order['OrderDate'];
+                                        ?>
+                                    </div>
+                                    
                                 </div>
+
+                                <div class="col-4 d-flex px-0">
+                                    <div class="col-5 px-0 font-weight-bolder">
+                                        السعر : 
+                                    </div>
+                                    <div class="col-7 px-0" dir="rtl">
+                                        <?php
+                                            $totalprice = 0;
+                                            foreach($pieces as $pi) :
+                                                $totalprice += $pi['PiecePrice'];
+                                            endforeach;
+                                            echo $totalprice .' جنيهاً';
+                                        ?>
+                                    </div>
+                                    
+                                </div>
+
                             </div>
 
-                            <div class="row w-100">
-                                <div class="col-9">
-                                    <?php 
-                                        echo $order['ClientPhone']; 
-                                    ?>
+                            <div class="row w-100 mx-0">
+
+                                <div class="col-7 d-flex px-0">
+                                    <div class="col-2 font-weight-bolder px-0">
+                                        الاسم : 
+                                    </div>
+                                    <div class="col-10 px-0">
+                                        <?php 
+                                            echo $order['ClientName'];
+                                        ?>
+                                    </div>
+                                    
                                 </div>
-                                <div class="col-3">
-                                    الهاتف 
+
+                                <div class="col-5 d-flex px-0">
+
+                                    <div class="col-3 font-weight-bolder px-0">
+                                        الهاتف : 
+                                    </div>
+                                    <div class="col-9 px-0">
+                                        <?php 
+                                            echo $order['ClientPhone'];
+                                            if($order['ClientPhone2'] != 0) :
+                                                echo '--' . $order['ClientPhone2'] ;
+                                            endif; 
+                                        ?>
+                                    </div>
+                                    
                                 </div>
+
                             </div>
 
-                            <div class="row w-100">
-                                <div class="col-9">
-                                    <?php 
-                                        echo    $size . ' - ' . 
-                                                $order['ProductName'] . ' - ' . 
-                                                $order['ProductColor'];
-                                    ?>
+                            <div class="row w-100 mx-0">
+
+                                <div class="col-12 d-flex px-0">
+                                    <div class="col-2 px-0 font-weight-bolder">
+                                        العنوان :
+                                    </div>
+                                    <div class="col-10 px-0" dir="rtl">
+                                        <?php 
+                                            echo $order['City'] . ' - ' . $order['ClientAddress'];
+                                        ?>
+                                    </div>
+                                    
                                 </div>
-                                <div class="col-3">
-                                    الموديل 
-                                </div>
+
                             </div>
 
-                            <div class="row w-100">
-                                <div class="col-9">
-                                    <?php 
-                                        echo $order['OrderPrice'];
-                                    ?>
-                                </div>
-                                <div class="col-3">
-                                    السعر 
-                                </div>
-                            </div>
+                            <div class="row w-100 mx-0">
 
-                            <div class="row w-100">
-                                <div class="col-9">
-                                    <?php 
-                                        echo $order['OrderDate'];
-                                    ?>
-                                </div>
-                                <div class="col-3">
-                                    التاريخ 
-                                </div>
-                            </div>
+                                <div class="col-12 d-flex px-0">
 
-                            <div class="row w-100">
-                                <div class="col-9">
-                                    <?php 
-                                        echo $order['City'] . ' - ' . $order['ClientAddress'];
-                                    ?>
+                                    <div class="col-2 font-weight-bolder px-0">
+                                        الموديلات : 
+                                    </div>
+                                    <div class="col-10 px-0" dir="rtl">
+                                        <?php
+                                            foreach($pieces as $piece) :
+                                                $SizeNum = $piece['ProductSize'];
+                                                $size = $arraySize[$SizeNum];
+                                                
+                                                echo' 
+                                                    <span dir="rtl">('   
+                                                        . $piece['NumberOfPieces'] . ')'
+                                                        . $piece['ProductName'] . ' -' 
+                                                        . $piece['ProductColor'] . '-' 
+                                                        . $size . ' /
+                                                    </span>
+                                                    ';
+
+                                            endforeach;
+                                        ?>
+                                    </div>
+                                    
                                 </div>
-                                <div class="col-3">
-                                    العنوان
-                                </div>
+
                             </div>
 
                         </div>
+
                     </div>
 
                     <?php
@@ -335,7 +439,7 @@
             
             <!-- print the page -->
             <script>
-                window.print();
+                 window.print();
             </script>
 
         </div>

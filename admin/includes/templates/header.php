@@ -16,7 +16,7 @@
 
     <script src="https://kit.fontawesome.com/09f90bb15d.js" crossorigin="anonymous"></script>
     <!-- my css file -->
-    <link rel="stylesheet" href="../admin/layout/css/style.css">
+    <link rel="stylesheet" href="../admin/layout/css/main.css">
   </head>
   <body>
       

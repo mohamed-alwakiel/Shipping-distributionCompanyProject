@@ -165,13 +165,12 @@
 */
     function convertArabicNumToEnglish($number)
     {
-        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        $arabic = ['٩', '٨', '٧', '٦', '٥', '٤', '٣', '٢', '١','٠'];
+
+        $western_arabic = array('0','1','2','3','4','5','6','7','8','9');
+        $eastern_arabic = array('٠','١','٢','٣','٤','٥','٦','٧','٨','٩');
+        
+        $str = str_replace($eastern_arabic, $western_arabic, $number);
     
-        $num = range(0, 9);
-        $convertedPersianNums = str_replace($persian, $num, $number);
-        $englishNumbersOnly = str_replace($arabic, $num, $convertedPersianNums);
-    
-        return $englishNumbersOnly;
+        return $str;
     }
 ?>

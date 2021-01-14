@@ -1,0 +1,267 @@
+.bord {
+    border: 3px solid black;
+}
+
+
+/* start main rules */
+
+body {
+    background-color: #f4f4f4;
+    font-size: 18px;
+}
+
+
+/* icons */
+
+.icon {
+    width: 43px;
+    background-color: #212529 !important;
+}
+
+
+/* to print A4 page */
+
+.page {
+    width: 21cm;
+    min-height: 29.7cm;
+    /* padding: .5cm; */
+    margin: 1cm auto;
+    border: 1px #D3D3D3 solid;
+    border-radius: 5px;
+    background: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.page .card {
+    height: 234px;
+    padding-bottom: 16px;
+    padding-top: 16px;
+}
+
+@page {
+    size: A4;
+    margin: 0;
+}
+
+@media print {
+    .page {
+        margin: 0;
+        border: initial;
+        border-radius: initial;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        background: initial;
+        page-break-after: always;
+    }
+}
+
+
+/* astric */
+
+.astric {
+    color: #D20707;
+    position: absolute;
+    font-size: 25px;
+    right: 10px;
+    top: 3px;
+}
+
+
+/* eye for pass */
+
+.showpass {
+    position: absolute;
+    top: 10px;
+    right: -28px;
+}
+
+
+/* end main reules */
+
+
+/* start login page */
+
+.loginconatiner {
+    height: 700px;
+}
+
+
+/* end login page */
+
+
+/* start dashboard */
+
+.home-stat .stat {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-size: 20px;
+    border-radius: 10px;
+    color: #fff;
+}
+
+.home-stat .stat a {
+    color: #fff;
+}
+
+.home-stat .stat a:hover {
+    text-decoration: none;
+}
+
+.home-stat .st-new {
+    background: #00b894;
+}
+
+.home-stat .st-prepare {
+    background: #e17055;
+}
+
+.home-stat .st-back {
+    background: #74b9ff;
+}
+
+.home-stat .st-distribute {
+    background: #636e72;
+}
+
+.home-stat .st-deliverd {
+    background: #e8a87c;
+}
+
+.home-stat .stat span {
+    display: block;
+    font-size: 50px;
+}
+
+.home-stat .stat span i {
+    font-size: 50px;
+}
+
+
+/* end dashboard */
+
+
+/* bootstrap updates */
+
+.form-control {
+    position: relative;
+}
+
+
+/* bootstrap updates */
+
+
+/* start edit table */
+
+.main-table td {
+    background: #fff;
+    vertical-align: middle !important;
+    padding: 2px;
+}
+
+.main-table .form-check-input {
+    position: unset;
+    margin: 0;
+}
+
+.main-table .table td,
+.table th {
+    padding: 5px;
+}
+
+.main-table tbody tr {
+    display: none;
+}
+
+.main-table tbody tr.activeTR {
+    display: table-row;
+}
+
+
+/* end edit table */
+
+
+/* start tbn load rows */
+
+#Rows-load {
+    display: none;
+}
+
+
+/* end tbn load rows */
+
+
+/* start btn to scroll */
+
+.min-h {
+    min-height: 100px;
+}
+
+#return-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 5px;
+    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.7);
+    width: 50px;
+    height: 50px;
+    display: block;
+    text-decoration: none;
+    -webkit-border-radius: 35px;
+    -moz-border-radius: 35px;
+    border-radius: 35px;
+    display: none;
+    -webkit-transition: all 0.3s linear;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+#return-to-top i {
+    color: #fff;
+    margin: 0;
+    position: relative;
+    left: 16px;
+    top: 13px;
+    font-size: 19px;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+#return-to-top:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+#return-to-top:hover i {
+    color: #fff;
+    top: 5px;
+}
+
+
+/* end btn to scroll */
+
+
+/* edit select box */
+
+select {
+    text-align-last: center;
+    text-align: center;
+    -ms-text-align-last: center;
+    -moz-text-align-last: center;
+}
+
+option {
+    direction: rtl;
+}
+
+
+/* table charge */
+
+.table-charge th {
+    border: 2px solid black !important;
+}

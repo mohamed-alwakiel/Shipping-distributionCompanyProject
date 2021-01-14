@@ -214,7 +214,7 @@
                     $manager = $check->fetch();
                     $managerid = $manager['ID'];
                 else:
-                    $themsg ='  <div class="alert alert-danger" role="alert">
+                    $themsg ='  <div class="alert alert-danger text-center" dir="rtl" role="alert">
                                     للاسف لا يوجد مسؤول شحن فى هذه المحافظة
                                 </div>';
                     RedirectFun($themsg,'back');
@@ -223,7 +223,7 @@
             
             if(count($formErrors) != 0) :
                 foreach($formErrors as $error) :
-                    echo  '<div class="alert alert-danger" role="alert">' . $error . '</div>';
+                    echo  '<div class="alert alert-danger text-center" dir="rtl" role="alert">' . $error . '</div>';
                 endforeach;
                 RedirectFun();    
             else :
@@ -231,7 +231,7 @@
                 // check if user Exist in database
                 $checkUser = CheckItem('UserName', 'users', $user);
                 if($checkUser == 1) :
-                    $themsg ='  <div class="alert alert-danger" role="alert">
+                    $themsg ='  <div class="alert alert-danger text-center" dir="rtl" role="alert">
                                     للاسف هذا المستخدم موجود بالفلعل
                                 </div>';
                     RedirectFun($themsg,'back');    
@@ -246,14 +246,14 @@
                                          $status, $managerid));
 
                     // print success message
-                    $themsg = ' <div class="alert alert-primary" role="alert">
+                    $themsg = ' <div class="alert alert-primary text-center" dir="rtl" role="alert">
                                     ' . $check->rowcount() . ' عضو تمت اضافته بنجاح
                                 </div>' ;
                     RedirectFun($themsg, 'members', 'insert');
                 endif;
             endif;
         else :
-            $themsg = ' <div class="alert alert-danger" role="alert">
+            $themsg = ' <div class="alert alert-danger text-center" dir="rtl" role="alert">
                             للاسف لا يمكن الدخول على هذه الصفحه مباشرة 
                         </div>';
             RedirectFun($themsg);  
@@ -264,7 +264,6 @@
         <!-- end insert page -->
 
     <?php
-
     endif;
 
 ?>

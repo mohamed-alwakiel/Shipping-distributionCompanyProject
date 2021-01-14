@@ -3,7 +3,7 @@
         echo    '<nav class="navbar navbar-expand-lg  shadow navbar-dark bg-dark">
                     <div class="container">';
             
-            if($_SESSION['UserStatus'] == 1) :
+            if($_SESSION['UserStatus'] == 1 || $_SESSION['UserStatus'] == 2) :
                 echo    '<a class="navbar-brand" href="dashboard.php">';
                             echo 'الرئيسية'; 
                 echo    '</a>';
@@ -16,16 +16,6 @@
                         
                         <div class="collapse navbar-collapse d-flex justify-content-between" id="app-nav">
                             <ul class="navbar-nav">';
-
-                            if($_SESSION['UserStatus'] == 1 || $_SESSION['UserStatus'] == 4) :
-                            
-                            echo'<li class="nav-item">
-                                    <a class="nav-link" 
-                                    href="orders.php?status=' . $_SESSION['UserStatus'] . '">';
-                                        echo 'الطلبات'; 
-                            echo    '</a>
-                                </li>';
-                            endif;
                     if($_SESSION['UserStatus'] == 1 || $_SESSION['UserStatus'] == 2) :
                         echo    '<li class="nav-item">
                                     <a class="nav-link" href="members.php">';
@@ -33,25 +23,62 @@
                             echo    '</a>
                                 </li>';
                     endif;
+                    
+                    if($_SESSION['UserStatus'] == 1 || $_SESSION['UserStatus'] == 4) :
+                            
+                            echo'<li class="nav-item">
+                                    <a class="nav-link" 
+                                    href="orders.php?status=' . $_SESSION['UserStatus'] . '">';
+                                        echo 'الطلبات'; 
+                            echo    '</a>
+                                </li>';
+                    endif;
+                    
                     if($_SESSION['UserStatus'] == 1) :
                         echo    '<li class="nav-item">
                                     <a class="nav-link" href="products.php">';
                                         echo 'المنتجات';
                             echo    '</a>
                                 </li>';
-                        echo    '<li class="nav-item">
-                                    <a class="nav-link" href="printer.php">';
-                                        echo 'الطباعة';
-                            echo    '</a>
-                                </li>';
                     endif;
+
                     if($_SESSION['UserStatus'] == 2) :
                         echo    '<li class="nav-item">
                                     <a class="nav-link" href="charge.php">';
-                                        echo 'الشحن';
+                                    echo 'الشحن';
                             echo    '</a>
                                 </li>';
                     endif;
+
+                    if($_SESSION['UserStatus'] == 1 || $_SESSION['UserStatus'] == 2) :
+                        echo    '<li class="nav-item">
+                                    <a class="nav-link" href="chargedelivered.php">';
+                                    echo 'الحسابات';
+                            echo    '</a>
+                                </li>';
+                        echo    '<li class="nav-item">
+                                    <a class="nav-link" href="chargebacked.php">';
+                                    echo 'المرتجعات';
+                        echo        '</a>
+                                </li>';
+                    endif;
+                                
+                    if($_SESSION['UserStatus'] == 2) :
+                        echo    '<li class="nav-item">
+                                    <a class="nav-link" href="chargeprinter.php">';
+                                    echo 'طباعة كشف';
+                        echo        '</a>
+                                </li>';
+                    endif;
+
+                    if($_SESSION['UserStatus'] == 1 || $_SESSION['UserStatus'] == 2) :
+                        echo    '<li class="nav-item">
+                                    <a class="nav-link" href="printer.php">';
+                                    echo 'طباعة طلبات';
+                            echo    '</a>
+                                </li>';
+                    endif;
+                    
                     if($_SESSION['UserStatus'] == 3) :
                         echo    '<li class="nav-item">
                                     <a class="nav-link" href="distrbution.php">';
